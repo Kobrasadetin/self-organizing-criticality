@@ -1,0 +1,19 @@
+html {
+    height: 100%;
+    background-size: cover;
+    background-repeat:no-repeat;
+    background: rgb(98,95,153);
+    background: linear-gradient(330deg, rgba(98,95,153,1) 0%, rgba(182,182,230,1) 35%, rgba(189,244,255,1) 100%);
+}
+
+svg text{
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+ }
+
+.number { 
+    font-family: Helvetica, Arial, Sans-Serif;
+    pointer-events: none; 
+}
