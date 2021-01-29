@@ -13,6 +13,13 @@ svg text{
     user-select: none;
  }
 
+ .fiddle {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+ }
+
 .number { 
     font-family: Helvetica, Arial, Sans-Serif;
     pointer-events: none; 

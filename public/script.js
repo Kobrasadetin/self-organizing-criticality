@@ -1,5 +1,5 @@
-const COLUMNS = 10;
-const ROWS = 10;
+const COLUMNS = 11;
+const ROWS = 11;
 
 const inBounds = ({ x, y }) => {
     return x >= 0 && x < COLUMNS && y >= 0 && y < ROWS;
@@ -51,21 +51,19 @@ function createGridData() {
     return data;
 }
 
-console.log({ d3 });
-
 const getColor = (d) => {
     if ((d) % 4 == 0) { return "#fff"; }
-    if ((d) % 4 == 1) { return "#2C93E8"; }
-    if ((d) % 4 == 2) { return "#F56C4E"; }
-    if ((d) % 4 == 3) { return "#838690"; }
+    if ((d) % 4 == 1) { return "#ff5"; }
+    if ((d) % 4 == 2) { return "#fa2"; }
+    if ((d) % 4 == 3) { return "#b33"; }
 }
 
 const gridData = createGridData();
 
 var grid = d3.select("#grid")
     .append("svg")
-    .attr("width", "510px")
-    .attr("height", "510px");
+    .attr("width", "561px")
+    .attr("height", "561px");
 
 var row = grid.selectAll(".row")
     .data(gridData)
@@ -84,12 +82,15 @@ var column = row.selectAll(".square")
     .attr("y-ix", function (d) { return d.y; })
     .attr("width", function (d) { return d.width; })
     .attr("height", function (d) { return d.height; })
-    .style("fill", "transparent")
+    .style("fill", function (d) {
+        return getColor(d.nval);
+    })
     .style("stroke", "#222")
-    .on('click', function (d) {
-        const target = d.target
-        const x = d.srcElement.getAttribute('x-ix')
-        const y = d.srcElement.getAttribute('y-ix')
+    .on('click', function (e) {
+        e.preventDefault();
+        const target = e.target
+        const x = e.srcElement.getAttribute('x-ix')
+        const y = e.srcElement.getAttribute('y-ix')
         updateColor({ x, y })
     })
 
@@ -113,6 +114,15 @@ const setColors = () => {
         .text(function (d) { return d.nval; })
 }
 
+const clearData = () => {
+    gridData.forEach((row) => {
+        row.forEach((cell) => {
+            cell.nval = 0;
+        })
+    })
+    setColors();
+}
+
 const simulateInsert = ({ x, y }) => {
     const dp = gridData[y][x];
     dp.nval++;
@@ -124,7 +134,54 @@ const simulateInsert = ({ x, y }) => {
 
 
 const updateColor = ({ x, y }) => {
-    console.log(gridData[y][x].nval);
     simulateInsert({ x, y });
     setColors();
+}
+
+var timedInterval;
+var timeMillis = 100
+var updateMethod = "random"
+
+function getRandomInt(max) {
+    return Math.floor(Math.random() * Math.floor(max));
+}
+
+const startTimed = () => {
+    timedInterval = setInterval(function () {
+        if (updateMethod === "random") {
+            updateColor({ x: getRandomInt(COLUMNS), y: getRandomInt(ROWS) });
+        } else if (updateMethod === "fixed center") {
+            updateColor({ x: 5, y: 5 });
+        } else if (updateMethod === "fixed corner") {
+            updateColor({ x: 0, y: 0 });
+        }
+    }, timeMillis);
+}
+
+const stopTimed = () => {
+    if (timedInterval) clearInterval(timedInterval);
+    timedInterval = null;
+}
+
+const selectSpeed = document.getElementById("speed");
+selectSpeed.value = "fast"
+selectSpeed.onchange = () => {
+    const speeds = { slow: 300, fast: 100, ultra: 17 }
+    timeMillis = speeds[selectSpeed.value];
+    if (timedInterval) {
+        stopTimed();
+        startTimed();
+    }
+}
+
+const startButton = document.getElementById("start");
+startButton.onclick = startTimed;
+const stopButton = document.getElementById("stop");
+stopButton.onclick = stopTimed;
+const clearButton = document.getElementById("clear");
+clearButton.onclick = clearData;
+const selectMethod = document.getElementById("method");
+selectMethod.onchange = () => {
+    updateMethod = selectMethod.value;
+    console.log(updateMethod);
 }
