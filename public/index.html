@@ -12,23 +12,29 @@
     <div class="fiddle">
         <h1> Itseorganisoituva kriittinen järjestelmä </h1>
         <div id="grid"></div>
-        <button id="start">Start</button>
-        <button id="stop">Stop</button>
-        <button id="clear">Clear</button>
+        <div id="controls">
+            <button id="start">Start</button>
+            <button id="stop">Stop</button>
+            <button id="clear">Clear</button>
 
-        <label for="method">Choose simulation method:</label>
-        <select name="method" id="method">
-            <option value="random">Random</option>
-            <option value="fixed corner">Fixed corner</option>
-            <option value="fixed center">Fixed center</option>
-        </select>
+            <div id="selectors">
+                <label for="method">Choose simulation method:</label>
+                <select name="method" id="method" class="select-css">
+                    <option value="random">Random</option>
+                    <option value="fixed corner">Fixed corner</option>
+                    <option value="fixed center">Fixed center</option>
+                </select>
 
-        <label for="speed">speed:</label>
-        <select name="speed" id="speed">
-            <option value="slow">Slow</option>
-            <option value="fast">Fast</option>
-            <option value="ultra">Ultra</option>
-        </select>
+                <label for="speed">speed:</label>
+                <select name="speed" id="speed" class="select-css">
+                    <option value="slow">Slow</option>
+                    <option value="fast">Fast</option>
+                    <option value="ultra">Ultra</option>
+                </select>
+            </div>
+        </div>
+
+        <div id="graph"></div>
     </div>
 
     <script src="script.js"></script>

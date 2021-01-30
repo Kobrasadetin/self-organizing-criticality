@@ -55,10 +55,12 @@ const getColor = (d) => {
     if ((d) % 4 == 0) { return "#fff"; }
     if ((d) % 4 == 1) { return "#ff5"; }
     if ((d) % 4 == 2) { return "#fa2"; }
-    if ((d) % 4 == 3) { return "#b33"; }
+    if ((d) % 4 == 3) { return "#e40"; }
 }
 
 const gridData = createGridData();
+const eventData = [];
+var eventDataMax = 25;
 
 var grid = d3.select("#grid")
     .append("svg")
@@ -103,7 +105,29 @@ var numbers = row.selectAll("cell")
     .attr("dy", ".35em")
     .text(function (d) { return d.nval; })
 
-const setColors = () => {
+var graph = d3.select("#graph")
+    .append("svg")
+    .attr("width", "561px")
+    .attr("height", "200px")
+    .append("g")
+
+graph.append("rect")
+    .style("fill", "#000")
+    .attr("width", "550px")
+    .attr("height", "200px")
+
+var bars = graph
+    .selectAll(".bar")
+    .data(eventData)
+    .enter().append("rect")
+    .style("fill", "#0f0")
+    .attr("class", "bar")
+    .attr("x", function (d, i) { return i * 2 + 10 })
+    .attr("y", function (d, i) { return 200 - d * 10 })
+    .attr("width", 10)
+    .attr("height", function (d, i) { return d * 10 })
+
+const redraw = () => {
     row.selectAll(".square")
         .data(function (d) { return d; })
         .style("fill", function (d) {
@@ -112,6 +136,31 @@ const setColors = () => {
     row.selectAll(".number")
         .data(function (d) { return d; })
         .text(function (d) { return d.nval; })
+
+    scaleFactor = 200 / eventDataMax
+    graph
+        .selectAll(".bar")
+        .remove()
+    graph
+        .selectAll(".bar")
+        .data(eventData)
+        .enter().append("rect")
+        .style("fill", "#0f0")
+        .attr("class", "bar")
+        .attr("x", function (d, i) { return i * 2 + 5 })
+        .attr("y", function (d, i) { return 200 - d * scaleFactor })
+        .attr("i", function (d, i) { return i })
+        .attr("width", 2)
+        .attr("height", function (d, i) { return d * scaleFactor })
+
+    graph
+        .append("rect")
+        .style("fill", "#333")
+        .attr("class", "bar")
+        .attr("x", eventData.length * 2 + 7)
+        .attr("y", 0)
+        .attr("width", 2)
+        .attr("height", 200)
 }
 
 const clearData = () => {
@@ -120,22 +169,31 @@ const clearData = () => {
             cell.nval = 0;
         })
     })
-    setColors();
+    eventData.length = 0
+    redraw();
 }
 
 const simulateInsert = ({ x, y }) => {
+    var events = 0;
     const dp = gridData[y][x];
     dp.nval++;
     if (dp.nval >= 4) {
         dp.nval = 0;
-        dp.neighbours.forEach(simulateInsert);
+        events++;
+        dp.neighbours.forEach((pos) => events += simulateInsert(pos));
     }
+    return events;
 }
 
 
 const updateColor = ({ x, y }) => {
-    simulateInsert({ x, y });
-    setColors();
+    const eventCount = simulateInsert({ x, y });
+    eventData.push(eventCount);
+    eventDataMax = Math.max(eventDataMax, eventCount)
+    while (eventData.length > 260) {
+        eventData.shift();
+    }
+    redraw();
 }
 
 var timedInterval;
@@ -147,15 +205,17 @@ function getRandomInt(max) {
 }
 
 const startTimed = () => {
-    timedInterval = setInterval(function () {
-        if (updateMethod === "random") {
-            updateColor({ x: getRandomInt(COLUMNS), y: getRandomInt(ROWS) });
-        } else if (updateMethod === "fixed center") {
-            updateColor({ x: 5, y: 5 });
-        } else if (updateMethod === "fixed corner") {
-            updateColor({ x: 0, y: 0 });
-        }
-    }, timeMillis);
+    if (!timedInterval) {
+        timedInterval = setInterval(function () {
+            if (updateMethod === "random") {
+                updateColor({ x: getRandomInt(COLUMNS), y: getRandomInt(ROWS) });
+            } else if (updateMethod === "fixed center") {
+                updateColor({ x: 5, y: 5 });
+            } else if (updateMethod === "fixed corner") {
+                updateColor({ x: 0, y: 0 });
+            }
+        }, timeMillis);
+    }
 }
 
 const stopTimed = () => {
